@@ -31,10 +31,21 @@ $user = $db->query('select * from users where email = :email', [
     'email' => $email,
 ])->find();
 
-// if yes, redirect to a login page
+// if yes, authenticate the existing account
 if ($user) {
-    // then someone with that email exists and has an account
-    // If yes, redirect to the login page
+    if ($user['password'] !== $password) {
+        return view('registration/create.view.php', [
+            'errors' => ['password' => 'Invalid email or password']
+        ]);
+    }
+
+    session_regenerate_id(true);
+
+    $_SESSION['user'] = [
+        'id' => (int) $user['id'],
+        'email' => $user['email']
+    ];
+
     header('location: /');
     exit();
 } else {
@@ -46,6 +57,7 @@ if ($user) {
 
     // mark that the user has logged in
     $_SESSION['user'] = [
+        'id' => (int) $db->connection->lastInsertId(),
         'email' => $email
     ];
 

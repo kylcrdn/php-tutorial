@@ -2,19 +2,21 @@
 
 use core\App;
 use core\Database;
+use core\functions;
 
 $db = App::resolve(Database::class);
 
-$currentUserId = 1;
+requireLogin();
+$currentUserId = currentUserId();
 
-$note = $db->query('select * from notes where id = :id', [
-    'id' => $_POST['id']
+$note = $db->query('select * from notes where id = :id and user_id = :user_id', [
+    'id' => $_POST['id'],
+    'user_id' => $currentUserId,
 ])->findOrFail();
 
-authorize($note['user_id'] === $currentUserId);
-
-$db->query('delete from notes where id = :id', [
-    'id' => $_POST['id']
+$db->query('delete from notes where id = :id and user_id = :user_id', [
+    'id' => $_POST['id'],
+    'user_id' => $currentUserId,
 ]);
 
 header('location: /notes');

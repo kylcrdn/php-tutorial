@@ -34,6 +34,36 @@ function authorize($condition, $status = Response::FORBIDDEN)
     }
 }
 
+function currentUserId()
+{
+    if (isset($_SESSION['user']['id'])) {
+        return (int) $_SESSION['user']['id'];
+    }
+
+    if (! isset($_SESSION['user']['email'])) {
+        return null;
+    }
+
+    $user = \core\App::resolve(\core\Database::class)
+        ->query('select id from users where email = :email', [
+            'email' => $_SESSION['user']['email'],
+        ])
+        ->find();
+
+    if (! $user) {
+        return null;
+    }
+
+    $_SESSION['user']['id'] = (int) $user['id'];
+
+    return (int) $user['id'];
+}
+
+function requireLogin()
+{
+    authorize(currentUserId() !== null);
+}
+
 // Helper functions for declaring a path that is relative to the root of the project
 
 function base_path($path)

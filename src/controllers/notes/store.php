@@ -8,6 +8,9 @@ $body = $_POST['body'];
 
 $db = App::resolve(Database::class);
 
+requireLogin();
+$currentUserId = currentUserId();
+
 $errors = [];
 
 if (! Validator::string($_POST['body'], 1, 1000)) {
@@ -23,7 +26,7 @@ if (! empty($errors)) {
 
 $db->query('insert into notes(body, user_id) values(:body,:user_id)', [
     'body' => $body,
-    'user_id' => 1
+    'user_id' => $currentUserId,
 ]);
 
 header('Location: /notes');

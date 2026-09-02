@@ -5,13 +5,13 @@ use core\App;
 
 $db = App::resolve(Database::class);
 
-$currentUserId = 1;
+requireLogin();
+$currentUserId = currentUserId();
 
-$note = $db->query('select * from notes where id = :id', [
-    'id' => $_GET['id']
+$note = $db->query('select * from notes where id = :id and user_id = :user_id', [
+    'id' => $_GET['id'],
+    'user_id' => $currentUserId,
 ])->findOrFail();
-
-authorize($note['user_id'] === $currentUserId);
 
 view('notes/show.view.php', [
     'heading' => 'Note',

@@ -6,15 +6,14 @@ use core\Validator;
 
 $db = App::resolve(Database::class);
 
-$currentUserId = 1;
+requireLogin();
+$currentUserId = currentUserId();
 
 // find the corresponding note
-$note = $db->query('select * from notes where id = :id', [
-    'id' => $_POST['id']
+$note = $db->query('select * from notes where id = :id and user_id = :user_id', [
+    'id' => $_POST['id'],
+    'user_id' => $currentUserId,
 ])->findOrFail();
-
-// authorize that the current user can edit the note
-authorize($note['user_id'] === $currentUserId);
 
 // validate the form
 $errors = [];
@@ -32,9 +31,10 @@ if (count($errors)) {
     ]);
 }
 
-$db->query('update notes set body = :body where id = :id', [
+$db->query('update notes set body = :body where id = :id and user_id = :user_id', [
     'id' => $_POST['id'],
     'body' => $_POST['body'],
+    'user_id' => $currentUserId,
 ]);
 
 header('location: /notes');
